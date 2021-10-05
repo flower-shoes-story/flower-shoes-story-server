@@ -11,7 +11,7 @@ initLoader(app);
 
 const index = require("./routes/index");
 
-app.use("/", index);
+app.use("/api", index);
 
 app.use((req, res, next) => {
   next(createError(404));
