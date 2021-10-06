@@ -47,3 +47,15 @@ exports.login = async (req, res, next) => {
     next(error);
   }
 };
+
+exports.authorize = async (req, res, next) => {
+  try {
+    return res.status(200).json({
+      result: "success",
+      message: MESSAGE.AUTHORIZED,
+      data: req.userInfo,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
