@@ -11,4 +11,11 @@ const MESSAGE = {
   AUTHORIZED: "user authorized successfully",
 };
 
-module.exports = { NUMBER, MESSAGE, TYPE };
+const EVENTS = {
+  JOIN: "join",
+  GET_MESSAGE: "getMessage",
+  SEND_MESSAGE: "sendMessage",
+  DISCONNECT: "disconnect",
+};
+
+module.exports = { NUMBER, MESSAGE, TYPE, EVENTS };
