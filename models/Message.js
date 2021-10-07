@@ -1,14 +1,18 @@
 const mongoose = require("mongoose");
 
 const messageSchema = new mongoose.Schema({
+  couple: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Couple",
+  },
   messages: [{
-    id: {
+    user: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
       required: true,
     },
     message: {
       type: String,
+      required: true,
     },
     time: {
       type: Date,
