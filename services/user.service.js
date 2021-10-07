@@ -1,6 +1,8 @@
 const User = require("../models/User");
 const Couple = require("../models/Couple");
 
+const { TYPE } = require("../constants");
+
 exports.findUser = async (userInfo) => {
   const { email } = userInfo;
 
@@ -21,7 +23,7 @@ exports.findPartner = async (email) => {
 
 exports.updateUserInfo = async (_id, type, partnerId, date) => {
   try {
-    const user = await User.findById(_id);
+    const user = await User.findById(_id).populate("couple").exec();
 
     if (!user.couple && !user.partner_id) {
       const events = {
@@ -33,15 +35,21 @@ exports.updateUserInfo = async (_id, type, partnerId, date) => {
       user.couple = couple._id;
       user.partner_id = partnerId;
       user.type = type;
+      user.type === TYPE.SOLDIER ? couple.soldier = user._id : couple.gomsin = user._id;
+
+      await couple.save();
     }
 
     if (!user.couple && user.partner_id) {
       const partner = await User.findOne({ email: user.partner_id }).populate("couple").exec();
+      const couple = await Couple.findById(partner.couple._id);
 
       user.couple = partner.couple._id;
+      user.type === TYPE.SOLDIER ? couple.soldier = user._id : couple.gomsin = user._id;
       user.is_matched = true;
       partner.is_matched = true;
 
+      await couple.save();
       await partner.save();
     }
 
