@@ -5,6 +5,7 @@ const server = http.createServer(app);
 const mongoose = require("mongoose");
 
 const Message = require("../models/Message");
+const Couple = require("../models/Couple");
 
 const { EVENTS } = require("../constants");
 
@@ -16,45 +17,65 @@ const io = require("socket.io")(server, {
 });
 
 io.on("connection", (socket) => {
+  const jumpUpMessages = ["사랑"];
+  const jumpDownMessages = ["바보"];
   let messages = [];
-  let targetMessages = null;
-  let targetRoomId = "";
 
   socket.on(EVENTS.JOIN, async (roomId) => {
-    targetRoomId = roomId;
-
-    targetMessages = await Message.findOne({ roomId });
+    const targetMessages = await Message.findOne({ couple: roomId });
+    const targetCouple = await Couple.findById(roomId);
 
     if (targetMessages) {
       messages.push(...targetMessages.messages);
     } else {
-      targetMessages = await Message.create({
-        couple: mongoose.Types.ObjectId(targetRoomId),
+      await Message.create({
+        couple: mongoose.Types.ObjectId(roomId),
         messages,
       });
     }
 
     socket.join(roomId);
 
-    socket.emit(EVENTS.GET_MESSAGE, messages);
+    socket.emit(EVENTS.GET_MESSAGES, messages);
+    socket.emit(EVENTS.SET_START_POSITION, targetCouple.stair);
   });
 
-  socket.on(EVENTS.SEND_MESSAGE, ({ user, message, time }) => {
+  socket.on(EVENTS.RESET_START_POSITION, async (coupleId, stairIndex) => {
+    const targetCouple = await Couple.findById(coupleId);
+    targetCouple.stair = stairIndex;
+    let score = 0;
+
+    if (targetCouple.score) {
+      score = targetCouple.score;
+    }
+
+    if (stairIndex === 14) {
+      targetCouple.score = score + 10;
+    }
+
+    await targetCouple.save();
+  });
+
+  socket.on(EVENTS.SEND_MESSAGE, async ({ roomId, user, message, time }) => {
+    if (jumpDownMessages.includes(message)) {
+      io.to(roomId).emit(EVENTS.LISTEN_JUMP_DIRECTION, "down");
+    }
+
+    if (jumpUpMessages.includes(message)) {
+      io.to(roomId).emit(EVENTS.LISTEN_JUMP_DIRECTION, "up");
+    }
+
     const chat = {
       user,
       message,
       time,
     };
 
-    messages.push(chat);
+    io.to(roomId).emit(EVENTS.SEND_MESSAGE, chat);
 
-    io.to(targetRoomId).emit(EVENTS.SEND_MESSAGE, chat);
-  });
-
-  socket.on(EVENTS.DISCONNECT, async () => {
     await Message.findOneAndUpdate(
-      { couple: mongoose.Types.ObjectId(targetRoomId) },
-      { $set: { messages } }
+      { couple: roomId },
+      { $push: { messages: chat } },
     );
   });
 });
