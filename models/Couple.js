@@ -12,19 +12,42 @@ const coupleSchema = new mongoose.Schema({
   },
   events: {
     visit: [{
-      type: Date,
+      startDate: {
+        type: Date,
+      },
+      endDate: {
+        type: Date,
+      },
     }],
     vacation: [{
-      type: Date,
+      startDate: {
+        type: Date,
+      },
+      endDate: {
+        type: Date,
+      },
     }],
     anniversary: [{
-      type: Date,
+      startDate: {
+        type: Date,
+      },
+      endDate: {
+        type: Date,
+      },
     }],
     discharge: {
-      type: Date,
+      startDate: {
+        type: Date,
+      },
+      endDate: {
+        type: Date,
+      },
     },
   },
-  stage: {
+  score: {
+    type: Number,
+  },
+  stair: {
     type: Number,
   },
   flower_collection: [{
