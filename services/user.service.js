@@ -1,5 +1,6 @@
 const User = require("../models/User");
 const Couple = require("../models/Couple");
+const Message = require("../models/Message");
 
 const { TYPE } = require("../constants");
 
@@ -21,23 +22,24 @@ exports.findPartner = async (email) => {
   }
 };
 
-exports.updateUserInfo = async (_id, type, partnerId, date) => {
+exports.updateUserInfo = async (_id, type, partnerId, date, dischargeDate) => {
   try {
-    const user = await User.findById(_id).populate("couple").exec();
+    const user = await User.findById(_id);
 
     if (!user.couple && !user.partner_id) {
       const events = {
-        anniversary: [date],
+        anniversary: [{ startDate: date, endDate: date }],
+        discharge: { startDate: dischargeDate, endDate: dischargeDate },
       };
 
-      const couple = await Couple.create({ events });
+      const couple = await Couple.create({ events, stair: 0 });
 
       user.couple = couple._id;
       user.partner_id = partnerId;
       user.type = type;
       user.type === TYPE.SOLDIER ? couple.soldier = user._id : couple.gomsin = user._id;
 
-      await couple.save();
+      await user.save();
     }
 
     if (!user.couple && user.partner_id) {
@@ -49,13 +51,35 @@ exports.updateUserInfo = async (_id, type, partnerId, date) => {
       user.is_matched = true;
       partner.is_matched = true;
 
-      await couple.save();
+      await partner.save();
+      await user.save();
+    }
+
+    const updatedUser = await User.findById(_id).populate("couple").exec();
+
+    return updatedUser;
+  } catch (error) {
+    throw error;
+  }
+};
+
+exports.deleteUserAndCouple = async (userId, coupleId, partnerId) => {
+  try {
+    if (partnerId) {
+      const partner = await User.findOne({ email: partnerId });
+      partner.is_matched = false;
+      partner.partner_id = "";
+      partner.couple = null;
+      partner.type = "";
       await partner.save();
     }
 
-    await user.save();
+    if (coupleId) {
+      await Couple.findByIdAndDelete(coupleId);
+      await Message.findOneAndDelete({ couple: coupleId });
+    }
 
-    return user;
+    await User.findByIdAndDelete(userId);
   } catch (error) {
     throw error;
   }
