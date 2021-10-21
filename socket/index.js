@@ -17,7 +17,7 @@ const io = require("socket.io")(server, {
 });
 
 io.on("connection", (socket) => {
-  const jumpUpMessages = ["사랑"];
+  const jumpUpMessages = ["사랑", "사랑해"];
   const jumpDownMessages = ["바보"];
   let messages = [];
 
