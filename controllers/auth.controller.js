@@ -48,6 +48,11 @@ exports.login = async (req, res, next) => {
   }
 };
 
+exports.logout = async (req, res, next) => {
+  res.clearCookie("token");
+  res.status(200).json({ result: "success" });
+};
+
 exports.authorize = async (req, res, next) => {
   try {
     return res.status(200).json({

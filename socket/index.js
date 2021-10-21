@@ -49,9 +49,16 @@ io.on("connection", (socket) => {
       score = targetCouple.score;
     }
 
-    if (stairIndex === 14) {
+    if (stairIndex === 10) {
       targetCouple.score = score + 10;
     }
+
+    await targetCouple.save();
+  });
+
+  socket.on("setCurrentIndex", async (coupleId, currentIndex) => {
+    const targetCouple = await Couple.findById(coupleId);
+    targetCouple.stair = currentIndex;
 
     await targetCouple.save();
   });
