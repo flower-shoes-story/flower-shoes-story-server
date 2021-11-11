@@ -17,8 +17,8 @@ const io = require("socket.io")(server, {
 });
 
 io.on("connection", (socket) => {
-  const jumpUpMessages = ["사랑"];
-  const jumpDownMessages = ["바보"];
+  const jumpUpMessages = ["사랑", "사랑해", "나도 사랑해", "나도사랑해"];
+  const jumpDownMessages = ["바보", "헤어져", "우리헤어져"];
   let messages = [];
 
   socket.on(EVENTS.JOIN, async (roomId) => {
@@ -49,9 +49,16 @@ io.on("connection", (socket) => {
       score = targetCouple.score;
     }
 
-    if (stairIndex === 14) {
+    if (stairIndex === 10) {
       targetCouple.score = score + 10;
     }
+
+    await targetCouple.save();
+  });
+
+  socket.on("setCurrentIndex", async (coupleId, currentIndex) => {
+    const targetCouple = await Couple.findById(coupleId);
+    targetCouple.stair = currentIndex;
 
     await targetCouple.save();
   });
