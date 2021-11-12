@@ -56,7 +56,7 @@ Flower Shoes Story는 실시간으로 통신하는 Socket.io, Interative한 서�
 
 ## 🌹 Duration
 
-2020.09.27 ~ 2020.10.15 / 3주 (1주 - 아이디어 구체화 & 설계 + 2주 - 구현 & 배포)
+2021.09.27 ~ 2021.10.15 / 3주
 
 1주차 - 아이디어 구체화, UX/UI, DB Schema 설계 <br>
 2주차 - UI layout setting, 소셜 로그인 구현, 채팅 구현 <br>
